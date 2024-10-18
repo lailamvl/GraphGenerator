@@ -38,15 +38,15 @@
         button {
             margin-bottom: 10px;
             padding: 10px 20px;
-            font-size: 16px;
+            font-size: 18px;
         }
 
         textarea {
             width: 100%;
-            height: 200px;
+            height: 500px;
             margin-top: 20px;
             padding: 10px;
-            font-size: 14px;
+            font-size: 24px;
         }
     </style>
 </head>
@@ -120,7 +120,7 @@
         // Create the network
         const network = new vis.Network(container, data, options);
 
-        // Function to show node positions
+        // Function that generates latex
         document.getElementById('showPositionsBtn').addEventListener('click', function() {
             const positions = network.getPositions(); // Get positions of all nodes
             let positionText = '';
@@ -132,11 +132,52 @@
             document.getElementById('positions').value = positionText;
         });
 
+        // Adiciona novos nos
         let nodeId = 6;
         document.getElementById('addNodeBtn').addEventListener('click', function() {
             nodes.add({ id: nodeId, label: '' + nodeId });
             nodeId++;
         });
+
+        // Adiciona/Remove arestas
+        let selectedNodes = [];
+        network.on("click", function (params) {
+            if (params.nodes.length === 1) {
+                const clickedNodeId = params.nodes[0];
+
+                // Add the clicked node to the selectedNodes array
+                selectedNodes.push(clickedNodeId);
+
+                // If two nodes are selected, create an edge between them
+                if (selectedNodes.length === 2) {
+                    const fromNode = selectedNodes[0];
+                    const toNode = selectedNodes[1];
+
+                    // Check if the IDs are different
+                    if (fromNode !== toNode) {
+                        const existingEdge = edges.get({
+                            filter: function(edge){
+                                return (edge.from === fromNode && edge.to === toNode) ||
+                                       (edge.from === toNode && edge.to === fromNode);
+                            }
+                        });
+
+                        if(existingEdge.length === 0){
+                            edges.add({ from: fromNode, to: toNode });
+                        }
+                        else{
+                            edges.remove(existingEdge);   
+                        }
+                    } else {
+                        alert("Cannot create an edge to the same node!");
+                    }
+
+                    // Clear the selected nodes array for the next edge addition
+                    selectedNodes = [];
+                }
+            }
+        });
+
     </script>
 </body>
 </html>
