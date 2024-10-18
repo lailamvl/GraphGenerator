@@ -20,6 +20,8 @@
     <h1>Interactive Network Graph</h1>
     <div id="network"></div>
 
+    <script src="https://unpkg.com/vis-network@9.0.4/dist/vis-network.min.js"></script>
+
     <script>
         // Example data for a network graph using Vis.js
         const nodes = new vis.DataSet([
@@ -44,10 +46,22 @@
             edges: edges
         };
 
-        const options = {};
+        const options = {
+            physics: false
+        };
 
         // Create the network
         const network = new vis.Network(container, data, options);
+    </script>
+
+    <button id="addNodeBtn">Add Node</button>
+
+    <script>
+        let nodeId = 6;
+        document.getElementById('addNodeBtn').addEventListener('click', function() {
+            nodes.add({ id: nodeId, label: 'Node ' + nodeId });
+            nodeId++;
+        });
     </script>
 </body>
 </html>
