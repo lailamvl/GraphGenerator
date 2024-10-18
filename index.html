@@ -59,9 +59,10 @@
 
         <!-- Right column: Controls (Buttons and Text Area) -->
         <div class="controls">
-            <button id="showPositionsBtn">Show Node Positions</button>
+            <button id="snapToGridBtn">Snap Nodes to Grid</button>
+            <button id="addNodeBtn">New Node</button>
+            <button id="genLatexBtn">Generate Latex</button>
             <textarea id="positions" readonly></textarea>
-            <button id="addNodeBtn">Add Node</button>
         </div>
     </div>
 
@@ -69,15 +70,15 @@
     <script src="https://unpkg.com/vis-network@9.0.4/dist/vis-network.min.js"></script>
 
     <script>
+
         // Example data for a network graph using Vis.js
         const nodes = new vis.DataSet([
-            { id: 1, label: '1' },
-            { id: 2, label: '2' },
-            { id: 3, label: '3' },
-            { id: 4, label: '4' },
-            { id: 5, label: '5' }
+            { id: 1 },
+            { id: 2 },
+            { id: 3 },
+            { id: 4 },
+            { id: 5 }
         ]);
-
         const edges = new vis.DataSet([
             { from: 1, to: 2 },
             { from: 1, to: 3 },
@@ -99,19 +100,14 @@
             },
             nodes: {
                 shape: 'dot', // Make all nodes circles
-                size: 30, // Set size for all nodes
+                size: 20, // Set size for all nodes
                 color: {
-                    border: '#2B7CE9',
-                    background: '#97C2FC',
+                    border: '#02051f',
+                    background: '#b0b0d1',
                     highlight: {
-                        border: '#028EAC',
-                        background: '#FFF2FF'
+                        border: '#161630',
+                        background: '#526fc4'
                     }
-                },
-                font: {
-                    color: '#343434',
-                    size: 14, // Font size for labels
-                    face: 'Arial'
                 },
                 borderWidth: 2 // Set border width
             }
@@ -121,27 +117,30 @@
         const network = new vis.Network(container, data, options);
 
         // Function that generates latex
-        document.getElementById('showPositionsBtn').addEventListener('click', function() {
-            const positions = network.getPositions(); // Get positions of all nodes
-            let positionText = '';
+        document.getElementById('genLatexBtn').addEventListener('click', function() {
+            let latexText = '\\begin{tikzpicture}[scale=2.2]\n' +
+                            '\\tikzstyle{vert} = [circle, draw, inner sep=5pt]\n';
 
+            const positions = network.getPositions(); 
+            const scale = 200;
             for (const [nodeId, position] of Object.entries(positions)) {
-                positionText += `Node ${nodeId}: x = ${position.x}, y = ${position.y}\n`;
+                latexText += `\t\\node[vert] (${nodeId}) at (${position.x/200}, ${position.y/200}) {};\n`;
             }
 
-            document.getElementById('positions').value = positionText;
+            const allEdges = edges.get(); 
+            allEdges.forEach(edge => {
+                latexText += `\t\\draw (${edge.from}) -- (${edge.to});\n`;
+            });
+
+            latexText += '\\end{tikzpicture}\n';
+
+            document.getElementById('positions').value = latexText;
         });
 
-        // Adiciona novos nos
-        let nodeId = 6;
-        document.getElementById('addNodeBtn').addEventListener('click', function() {
-            nodes.add({ id: nodeId, label: '' + nodeId });
-            nodeId++;
-        });
+        let selectedNodes = [];
 
         // Adiciona/Remove arestas
-        let selectedNodes = [];
-        network.on("click", function (params) {
+        network.on("click", function(params) {
             if (params.nodes.length === 1) {
                 const clickedNodeId = params.nodes[0];
 
@@ -168,14 +167,48 @@
                         else{
                             edges.remove(existingEdge);   
                         }
-                    } else {
-                        alert("Cannot create an edge to the same node!");
-                    }
-
+                    } 
                     // Clear the selected nodes array for the next edge addition
                     selectedNodes = [];
                 }
             }
+        });
+
+        // Remove vértices
+        network.on("doubleClick", function (params) {
+            if (params.nodes.length === 1) { 
+                const clickedNodeId = params.nodes[0];
+                // Remove o nó clicado
+                nodes.remove(clickedNodeId);
+            }
+        });
+
+
+        // Snap nodes to grid
+        document.getElementById('snapToGridBtn').addEventListener('click', function() {
+            const positions = network.getPositions(); 
+            nodes.forEach(node => {
+                const { x, y } = positions[node.id];
+
+                const scale = 100;
+                const snappedX = Math.round(x / scale) * scale;
+                const snappedY = Math.round(y / scale) * scale;
+
+                // Update the node position
+                nodes.update({ id: node.id, x: snappedX, y: snappedY });
+            });
+        });
+
+        // Adiciona novos nós com posição aleatória
+        let nodeId = 6;
+        document.getElementById('addNodeBtn').addEventListener('click', function() {
+            // Posições aleatórias dentro de um intervalo
+            const randomX = Math.floor(Math.random() * (container.clientWidth/2 - 500)); 
+            const randomY = Math.floor(Math.random() * (container.clientHeight/2 - 250));
+
+            // Adiciona um novo nó com a posição gerada
+            nodes.add({ id: nodeId, x: randomX, y: randomY });
+            nodeId++;
         });
 
     </script>
