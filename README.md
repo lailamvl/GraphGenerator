@@ -4,3 +4,5 @@ Um gerador de grafos para latex
 - Clicar duas vezes com botão esquerdo deleta um vértice
 - Clicar no botão "snap-to-grid" ajeita as coordenadas para números inteiros
 - Clicar no botão "generate latex" desenha o grafo na biblioteca tikz
+
+site : https://lailamvl.github.io/GraphGenerator/
