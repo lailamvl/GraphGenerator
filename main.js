@@ -1,4 +1,4 @@
-// Example data for a network graph using Vis.js
+// Mock graph
 const nodes = new vis.DataSet([
     { id: 1 },
     { id: 2 },
@@ -22,6 +22,13 @@ const data = {
 
 const options = {
     physics: false,
+    interaction: {
+      zoomView: false,
+      dragNodes: true,
+      dragView: true,
+      selectable: true,
+      hover: true
+    },
     edges: {
         smooth: false
     },
@@ -37,6 +44,9 @@ const options = {
             }
         },
         borderWidth: 2 // Set border width
+    },
+    manipulation: {
+      enabled: true
     }
 };
 
@@ -74,23 +84,17 @@ network.on("click", function(params) {
                     edges.remove(existingEdge);
                 }
             }
+            // Clicked on the same node, must remove it
+            else{
+                const connectedEdges = network.getConnectedEdges(clickedNodeId); 
+                edges.remove(connectedEdges);
+                nodes.remove(clickedNodeId);
+            }
             // Clear the selected nodes array for the next edge addition
             selectedNodes = [];
         }
     }
 });
-
-// Remove vértices
-network.on("doubleClick", function (params) {
-    if (params.nodes.length === 1) {
-        const clickedNodeId = params.nodes[0];
-        // Remove o nó clicado
-        const connectedEdges = network.getConnectedEdges(clickedNodeId);
-        edges.remove(connectedEdges);
-        nodes.remove(clickedNodeId);
-    }
-});
-
 
 // Snap nodes to grid
 document.getElementById('snapToGridBtn').addEventListener('click', function() {
@@ -120,7 +124,7 @@ document.getElementById('addNodeBtn').addEventListener('click', function() {
 });
 
 // Popup Stuff
-const modal = document.getElementById("popupModal");
+const modal = document.getElementById("popup");
 const openPopupBtn = document.getElementById("popupBtn");
 const popupText = document.getElementById("popupText");
 
@@ -128,24 +132,29 @@ const popupText = document.getElementById("popupText");
 openPopupBtn.onclick = function() {
   modal.style.display = "flex";
 
-  let latexText = '\\begin{tikzpicture}[scale=2.2]\n' +
-                  '\\tikzstyle{vert} = [circle, draw, inner sep=5pt]\n';
+  let latexText = '\\begin{tikzpicture}[scale=2.2]\n';
+  latexText += '\n';
+
+  latexText += '\\tikzstyle{vert} = [circle, draw, inner sep=5pt]\n';
+  latexText += '\n';
 
   const positions = network.getPositions();
   for (const [nodeId, position] of Object.entries(positions)) {
       latexText += `\t\\node[vert] (${nodeId}) at (${position.x/200}, ${-position.y/200}) {};\n`;
   }
+  latexText += '\n';
 
   const allEdges = edges.get();
   allEdges.forEach(edge => {
       latexText += `\t\\draw (${edge.from}) -- (${edge.to});\n`;
   });
+  latexText += '\n';
 
   latexText += '\\end{tikzpicture}\n';
 
   let formattedText = latexText
     .replace(/\n/g, "<br>")
-    .replace(/\t/g, "&emsp;");
+    .replace(/\t/g, "");
 
   popupText.innerHTML = formattedText;
 }

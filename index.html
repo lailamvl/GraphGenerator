@@ -8,28 +8,38 @@
 </head>
 <body>
     <div class="container">
-        <!-- Left column: Network visualizer -->
-        <div id="network" class="screen"></div>
+        <!-- Left screen for text content -->
+        <div class="left-screen">
+            <h2>Tutorial</h2>
+            <p>Deleting a node: click twice on it.</p>
+            <p>Creating an edge: click on the desired endpoints.</p>
+            <p>Deleting an edge: click on the endpoints of it.</p>
+        </div>
 
-        <!-- Right column: Controls (Buttons and Text Area) -->
-        <div class="controls" class="screen">
-            <button id="snapToGridBtn">Snap Nodes to Grid</button>
-            <button id="addNodeBtn">New Node</button>
+        <!-- Middle screen for interaction -->
+        <div class="middle-screen">
+             <div id="network" class="screen"></div>
+        </div>
+
+        <!-- Right section for buttons -->
+        <div class="right-buttons">
+            <button id="snapToGridBtn">Snap to Grid</button>
+            <button id="addNodeBtn">Create Node</button>
             <button id="popupBtn">Get Latex</button>
         </div>
 
-        <!-- The Popup Modal -->
-         <div id="popupModal" class="modal" style="display: none;">
-            <div class="modal-content">
-              <div id="popupText"></div>
-            </div>
+         <!-- Modal Popup for the Latex -->
+         <div id="popup" style="display: none;">
+             <div id="popup-content">
+               <div id="popupText"></div>
+             </div>
          </div>
     </div>
 
     <!-- Biblioteca Vis.js -->
     <script src="https://unpkg.com/vis-network@9.0.4/dist/vis-network.min.js"></script>
 
-    <!-- Nosso js -->
+    <!-- Our js -->
     <script src="main.js"></script>
 </body>
 </html>
